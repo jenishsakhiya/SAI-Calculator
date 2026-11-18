@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 108dp adaptive-icon foreground: a soft jaw block with a lime price bar -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- jaw: stepped block -->
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M34,66 L34,46 L56,46 L56,36 L74,36 L74,66 Z" />
+    <!-- serrations -->
+    <path android:fillColor="#1A9FE0"
+        android:pathData="M36,66 l2,-3 l2,3 l2,-3 l2,3 l2,-3 l2,3 l2,-3 l2,3 l2,-3 l2,3 l2,-3 l2,3 l2,-3 l2,3 l2,-3 l2,3 l2,-3 l2,3 Z" />
+    <!-- bolt holes -->
+    <path android:fillColor="#1A9FE0"
+        android:pathData="M42,56 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 M51,56 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+    <!-- lime bar -->
+    <path android:fillColor="#A6C814"
+        android:pathData="M34,71 L74,71 L74,76 L34,76 Z" />
+</vector>

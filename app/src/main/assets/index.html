@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SAI Soft Jaws – Price Calculator</title>
+<style>
+  :root{
+    --blue:#1a9fe0; --blue-d:#0d7fba; --lime:#a6c814;
+    --ink:#1c2430; --mute:#6b7685; --line:#e3e8ee; --bg:#f4f6f9; --card:#fff;
+    --ok:#e9f6ff; --warn:#fff6e5; --warn-ink:#8a5a00;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+       background:var(--bg);color:var(--ink);-webkit-text-size-adjust:100%}
+  header{background:var(--blue);color:#fff;padding:16px;border-bottom:5px solid var(--lime);display:flex;align-items:center;gap:12px}
+  header .txt{flex:1;min-width:0}
+  header h1{margin:0;font-size:20px;letter-spacing:.3px}
+  header p{margin:3px 0 0;font-size:13px;opacity:.9}
+  #back{background:rgba(255,255,255,.18);color:#fff;border:0;border-radius:9px;width:40px;height:40px;font-size:22px;line-height:1;cursor:pointer;flex:none}
+  #back[hidden]{display:none}
+  main{max-width:520px;margin:0 auto;padding:14px}
+  .card{background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .lead{font-size:14px;color:var(--mute);margin:2px 2px 12px}
+  .prod{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--card);border:1.5px solid var(--line);
+        border-radius:12px;padding:16px;margin-bottom:12px;cursor:pointer;font:inherit;color:inherit;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .prod:active{border-color:var(--blue);background:var(--ok)}
+  .prod .ic{width:46px;height:46px;border-radius:10px;background:var(--ok);flex:none;display:grid;place-items:center}
+  .prod .nm{font-size:17px;font-weight:700}
+  .prod .ds{font-size:13px;color:var(--mute);margin-top:3px}
+  .prod .ar{margin-left:auto;color:var(--mute);font-size:22px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  label{display:block;font-size:13px;font-weight:600;color:var(--mute);margin-bottom:5px}
+  label small{font-weight:400}
+  input{width:100%;font-size:18px;padding:11px 12px;border:1.5px solid var(--line);border-radius:9px;
+        background:#fff;color:var(--ink);outline:none;-moz-appearance:textfield}
+  input:focus{border-color:var(--blue)}
+  input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .suffix{position:relative}
+  .suffix span{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--mute);font-size:15px;pointer-events:none}
+  .suffix input{padding-right:40px}
+  .btns{display:flex;gap:10px;margin-top:14px}
+  button{font:inherit}
+  .primary,.ghost{border:0;border-radius:9px;padding:12px 14px;font-size:16px;font-weight:600;cursor:pointer}
+  .primary{flex:1;background:var(--blue);color:#fff}
+  .primary:active{background:var(--blue-d)}
+  .ghost{background:#eef1f5;color:var(--ink)}
+  #result:empty{display:none}
+  .match{border:1.5px solid var(--blue);background:var(--ok);border-radius:10px;padding:14px;margin-bottom:10px}
+  .match .tag{font-size:12px;font-weight:700;color:var(--blue-d);text-transform:uppercase;letter-spacing:.5px}
+  .match .chuck{font-size:14px;color:var(--mute);margin-top:2px}
+  .rows{margin-top:10px;font-size:15px}
+  .rows div{display:flex;justify-content:space-between;padding:4px 0}
+  .rows .net{border-top:1px dashed #b9d9ee;margin-top:6px;padding-top:9px;font-size:22px;font-weight:800}
+  .rows .disc{color:#c0392b}
+  .note{background:var(--warn);color:var(--warn-ink);border-radius:10px;padding:12px 14px;font-size:14px;margin-bottom:10px}
+  .alt{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .alt .dims{font-weight:700}
+  .alt .sub{font-size:12.5px;color:var(--mute);margin-top:2px}
+  .alt .p{text-align:right;white-space:nowrap}
+  .alt .p b{display:block;font-size:17px}
+  .alt .p s{font-size:12px;color:var(--mute)}
+  h2{font-size:15px;margin:0 0 10px}
+  details summary{cursor:pointer;font-weight:700;font-size:15px;list-style:none}
+  details summary::-webkit-details-marker{display:none}
+  details summary::after{content:"▾";float:right;color:var(--mute)}
+  details[open] summary::after{content:"▴"}
+  .tablewrap{overflow-x:auto;margin-top:12px}
+  table{border-collapse:collapse;width:100%;font-size:13.5px}
+  th,td{padding:8px 6px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{background:#f0f3f7;color:var(--mute);font-weight:600}
+  tbody tr{cursor:pointer}
+  tbody tr:active,tbody tr.hl{background:var(--ok)}
+  td.ch{font-weight:700;color:var(--blue-d)}
+  .hint{font-size:12.5px;color:var(--mute);margin:6px 0 0}
+  footer{text-align:center;color:var(--mute);font-size:12px;padding:6px 0 24px}
+  .std{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .std .lbl{font-weight:700;font-size:15px}
+  .std .lbl small{display:block;font-weight:400;color:var(--mute);font-size:12.5px;margin-top:2px}
+  .stepper{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;flex:none}
+  .stepper button{width:44px;height:46px;border:0;background:#eef1f5;font-size:22px;color:var(--ink);cursor:pointer}
+  .stepper button:active{background:var(--ok)}
+  .stepper .val{position:relative;width:76px}
+  .stepper input{border:0;border-radius:0;text-align:center;font-weight:800;font-size:20px;padding:10px 22px 10px 6px}
+  .stepper .val span{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--mute);pointer-events:none}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+<header>
+  <button id="back" type="button" aria-label="Back to products" hidden>‹</button>
+  <div class="txt">
+    <h1 id="title">SAI Soft Jaws</h1>
+    <p id="subtitle">Price calculator · choose a product</p>
+  </div>
+</header>
+
+<main>
+  <!-- Screen 1: product selector -->
+  <section id="pick">
+    <div class="card std">
+      <div class="lbl">Standard discount<small>Used by every calculator unless you type a different one there.</small></div>
+      <div class="stepper">
+        <button type="button" id="stdMinus" aria-label="Decrease">−</button>
+        <div class="val"><input id="std" type="number" inputmode="decimal" step="any" min="0" max="100" aria-label="Standard discount percent"><span>%</span></div>
+        <button type="button" id="stdPlus" aria-label="Increase">+</button>
+      </div>
+    </div>
+    <p class="lead">Select a product to calculate its price.</p>
+    <div id="plist"></div>
+  </section>
+
+  <!-- Screen 2: calculator -->
+  <section id="calc" hidden>
+    <form class="card" id="f" autocomplete="off">
+      <div class="grid" id="fields"></div>
+      <p class="hint" id="dhint"></p>
+      <div class="btns">
+        <button type="submit" class="primary">Get price</button>
+        <button type="button" class="ghost" id="clear">Clear</button>
+      </div>
+    </form>
+
+    <div class="card" id="result"></div>
+
+    <details class="card" id="all">
+      <summary id="allsum">All sizes (tap a row to fill)</summary>
+      <div class="tablewrap">
+        <table><thead id="th"></thead><tbody id="tb"></tbody></table>
+      </div>
+    </details>
+  </section>
+
+  <footer>List prices as printed in the SAI catalogue. Price = catalogue price × (your length ÷ catalogue length) − discount.</footer>
+</main>
+
+<script>
+/* ---------- Product catalogue ----------
+   To add a product: add one entry here.
+   inputs  = the size fields the user types, in display order (key must exist in each row)
+   cols    = columns shown in the full table
+   rows    = data copied from the catalogue page                                   */
+const PRODUCTS = [
+  {
+    id: "kitagawa",
+    name: "Kitagawa Soft Jaws",
+    page: "06",
+    inputs: [
+      {key:"w", label:"Width (A)", ph:"e.g. 50"},
+      {key:"h", label:"Height (B)", ph:"e.g. 75"},
+      {key:"l", label:"Length (C)", ph:"e.g. 110"}
+    ],
+    cols: [["sr","#"],["chuck","Chuck"],["w","W (A)"],["h","H (B)"],["l","L (C)"],["slot","Slot"],["pcd","PCD"],["serr","Serr."],["price","Price ₹"]],
+    sub: r => `Chuck ${r.chuck} · Slot ${r.slot} · PCD ${r.pcd} · Serration ${r.serr}`,
+    alt: r => `Chuck ${r.chuck} · Sr. ${r.sr}`,
+    rows: [
+      // sr, chuck, W(A), H(B), L(C), slot D, PCD E, serration F, price
+      [1,"135 / 4\"",25,25,70,10,14,"1.5 x 60°",500],
+      [2,"135 / 4\"",25,32,70,10,14,"1.5 x 60°",670],
+      [3,"135 / 4\"",25,40,70,10,14,"1.5 x 60°",720],
+      [4,"135 / 4\"",25,50,70,10,14,"1.5 x 60°",770],
+      [5,"135 / 4\"",25,75,70,10,14,"1.5 x 60°",1050],
+      [6,"165 / 6\"",32,32,85,12,20,"1.5 x 60°",650],
+      [7,"165 / 6\"",32,40,85,12,20,"1.5 x 60°",820],
+      [8,"165 / 6\"",32,50,85,12,20,"1.5 x 60°",985],
+      [9,"165 / 6\"",32,75,85,12,20,"1.5 x 60°",1285],
+      [10,"165 / 6\"",32,100,85,12,20,"1.5 x 60°",1600],
+      [11,"200 / 8\"",38,38,100,14,25,"1.5 x 60°",720],
+      [12,"200 / 8\"",40,50,100,14,25,"1.5 x 60°",1120],
+      [13,"200 / 8\"",38,63,100,14,25,"1.5 x 60°",1300],
+      [14,"200 / 8\"",38,75,100,14,25,"1.5 x 60°",1485],
+      [15,"200 / 8\"",38,100,100,14,25,"1.5 x 60°",2035],
+      [16,"200 / 8\"",38,125,100,14,25,"1.5 x 60°",2750],
+      [17,"200 / 8\"",38,150,100,14,25,"1.5 x 60°",3320],
+      [18,"200 / 8\"",38,175,100,14,25,"1.5 x 60°",3950],
+      [19,"200 / 8\"",38,200,100,14,25,"1.5 x 60°",4285],
+      [20,"250 / 10\"",45,45,110,16,30,"1.5 x 60°",1150],
+      [21,"250 / 10\"",50,50,110,16,30,"1.5 x 60°",1285],
+      [22,"250 / 10\"",50,63,110,16,30,"1.5 x 60°",1715],
+      [23,"250 / 10\"",50,75,110,16,30,"1.5 x 60°",2220],
+      [24,"250 / 10\"",50,100,110,16,30,"1.5 x 60°",2985],
+      [25,"250 / 10\"",50,125,100,16,30,"1.5 x 60°",3650],
+      [26,"250 / 10\"",50,150,100,16,30,"1.5 x 60°",4320],
+      [27,"250 / 10\"",50,175,100,16,30,"1.5 x 60°",4935],
+      [28,"250 / 10\"",50,200,100,16,30,"1.5 x 60°",5750],
+      [29,"300 / 12\"",50,50,125,21,30,"1.5 x 60°",1465],
+      [30,"300 / 12\"",50,63,125,21,30,"1.5 x 60°",2060],
+      [31,"300 / 12\"",50,75,125,21,30,"1.5 x 60°",2650],
+      [32,"300 / 12\"",50,100,125,21,30,"1.5 x 60°",3585],
+      [33,"300 / 12\"",50,125,100,21,30,"1.5 x 60°",3650],
+      [34,"300 / 12\"",50,150,100,21,30,"1.5 x 60°",4320],
+      [35,"300 / 12\"",50,175,100,21,30,"1.5 x 60°",4935],
+      [36,"300 / 12\"",50,200,100,21,30,"1.5 x 60°",5800],
+      [37,"400 / 16\"",63,63,150,22,43,"1.5 x 60°",3150],
+      [38,"400 / 16\"",60,75,150,22,43,"1.5 x 60°",5800],
+      [39,"400 / 16\"",60,100,150,22,43,"1.5 x 60°",6620],
+      [40,"400 / 16\"",60,125,150,22,43,"1.5 x 60°",8285],
+      [41,"400 / 16\"",60,150,150,22,43,"1.5 x 60°",9950],
+      [42,"530 / 20\"",63,63,180,25.5,60,"3.0 x 60°",3775],
+      [43,"530 / 20\"",60,75,180,25.5,60,"3.0 x 60°",6970],
+      [44,"530 / 20\"",60,100,180,25.5,60,"3.0 x 60°",7920],
+      [45,"600",75,75,180,25.5,60,"3.0 x 60°",6300]
+    ].map(r=>({sr:r[0],chuck:r[1],w:r[2],h:r[3],l:r[4],slot:r[5],pcd:r[6],serr:r[7],price:r[8]}))
+  },
+  {
+    id: "l-type",
+    name: "L-Type Soft Jaws",
+    page: "09",
+    inputs: [
+      {key:"c", label:"Width (C / D)", ph:"e.g. 40"},
+      {key:"h", label:"Height (A)", ph:"e.g. 75"},
+      {key:"l", label:"Length (B)", ph:"e.g. 100"}
+    ],
+    cols: [["sr","#"],["chuck","Chuck size"],["h","H (A)"],["l","L (B)"],["c","W (C)"],["d","D"],["price","Price ₹"]],
+    sub: r => `Chuck ${r.chuck} · C ${r.c} · D ${r.d}`,
+    alt: r => `${r.chuck} · Sr. ${r.sr}`,
+    rows: [
+      // sr, chuck size, Height(A), Length(B), C, D, price
+      [1,"135 x 50 - L",50,70,25,25,850],
+      [2,"135 x 75 - L",75,70,25,25,1175],
+      [3,"165 x 50 - L",50,85,35,35,1070],
+      [4,"165 x 75 - L",75,85,35,35,1410],
+      [5,"165 x 100 - L",100,85,35,35,1770],
+      [6,"200 x 50 - L",50,100,40,40,1200],
+      [7,"200 x 75 - L",75,100,40,40,1610],
+      [8,"200 x 100 - L",100,100,40,40,2200],
+      [9,"200 x 125 - L",125,100,40,40,2960],
+      [10,"200 x 150 - L",150,100,40,40,3570],
+      [11,"200 x 175 - L",175,100,40,40,4240],
+      [12,"200 x 200 - L",200,100,40,40,4620],
+      [13,"250 x 75 - L",75,110,45,45,2343],
+      [14,"250 x 100 - L",100,110,45,45,3150],
+      [15,"250 x 125 - L",125,100,45,45,3860],
+      [16,"250 x 150 - L",150,100,45,45,4570],
+      [17,"250 x 175 - L",175,100,45,45,5225],
+      [18,"250 x 200 - L",200,100,45,45,6085],
+      [19,"300 x 75 - L",75,125,50,50,2775],
+      [20,"300 x 100 - L",100,125,50,50,3750],
+      [21,"300 x 125 - L",125,100,50,50,3860],
+      [22,"300 x 150 - L",150,100,50,50,4570],
+      [23,"300 x 175 - L",175,100,50,50,5225],
+      [24,"300 x 200 - L",200,100,50,50,6135]
+    ].map(r=>({sr:r[0],chuck:r[1],h:r[2],l:r[3],c:r[4],d:r[5],price:r[6]}))
+  }
+];
+
+/* ---------- Helpers ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = n => { const f = Number.isInteger(n) ? 0 : 2; return "₹" + n.toLocaleString("en-IN",{minimumFractionDigits:f,maximumFractionDigits:f}); };
+const net = (p,d) => Math.round(p*(1-d/100)*100)/100;
+const short = lbl => lbl.replace(/\s*\(.*\)/,"");
+let P = null;          // current product
+/* Standard discount (home page) — remembered on this device if the browser allows */
+const STD_KEY = "sai-std-discount";
+let STD = 37;
+try{ const v = parseFloat(localStorage.getItem(STD_KEY)); if(!isNaN(v)) STD = v; }catch(_){}
+const clampPct = n => Math.min(Math.max(n,0),100);
+const pctTxt = n => (Math.round(n*100)/100).toString();
+function setStd(n, fromInput){
+  if(isNaN(n)) return;
+  STD = clampPct(Math.round(n*100)/100);
+  if(!fromInput) $("std").value = pctTxt(STD);
+  try{ localStorage.setItem(STD_KEY, String(STD)); }catch(_){}
+}
+
+const ICON = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0d7fba" stroke-width="1.8" stroke-linejoin="round"><path d="M3 9l4-4h14v10l-4 4H3z"/><path d="M3 9h14v10M17 9l4-4"/></svg>`;
+const ICON_L = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0d7fba" stroke-width="1.8" stroke-linejoin="round"><path d="M4 20V14h10V4h6v16z"/></svg>`;
+
+/* ---------- Selector ---------- */
+$("plist").innerHTML = PRODUCTS.map(p=>`
+  <button class="prod" type="button" data-id="${p.id}">
+    <span class="ic">${p.id==="l-type"?ICON_L:ICON}</span>
+    <span><div class="nm">${esc(p.name)}</div>
+      <div class="ds">${p.rows.length} sizes · catalogue page ${p.page}</div></span>
+    <span class="ar">›</span>
+  </button>`).join("");
+$("plist").addEventListener("click",e=>{
+  const b = e.target.closest(".prod"); if(!b) return;
+  const p = PRODUCTS.find(x=>x.id===b.dataset.id);
+  openProduct(p); window.scrollTo(0,0);
+  try{ history.replaceState(null,"","#"+p.id); }catch(_){}
+});
+
+/* ---------- Routing (#kitagawa, #l-type) ---------- */
+function route(){
+  const p = PRODUCTS.find(x=>x.id===location.hash.slice(1));
+  if(p) openProduct(p); else showPicker();
+  window.scrollTo(0,0);
+}
+function showPicker(){
+  P = null;
+  $("pick").hidden=false; $("calc").hidden=true; $("back").hidden=true;
+  $("title").textContent="SAI Soft Jaws";
+  $("subtitle").textContent="Price calculator · choose a product";
+}
+function openProduct(p){
+  P = p;
+  $("pick").hidden=true; $("calc").hidden=false; $("back").hidden=false;
+  $("title").textContent=p.name;
+  $("subtitle").textContent=`Price calculator · SAI catalogue, page ${p.page}`;
+  $("fields").innerHTML = p.inputs.map(f=>`
+    <div><label for="in-${f.key}">${esc(f.label)} <small>mm</small></label>
+    <input id="in-${f.key}" type="number" inputmode="decimal" step="any" min="0" placeholder="${esc(f.ph)}"></div>`).join("") + `
+    <div><label for="d">Discount</label>
+    <div class="suffix"><input id="d" type="number" inputmode="decimal" step="any" min="0" max="100" placeholder="${pctTxt(STD)}"><span>%</span></div></div>`;
+  $("dhint").textContent = `All sizes in mm. Price scales with length. Leave discount blank to use the standard ${pctTxt(STD)}%.`;
+  $("result").innerHTML="";
+  $("allsum").textContent = `All ${p.rows.length} sizes (tap a row to fill)`;
+  $("all").open = false;
+  $("th").innerHTML = "<tr>"+p.cols.map(c=>`<th>${esc(c[1])}</th>`).join("")+"</tr>";
+  $("tb").innerHTML = p.rows.map(r=>`<tr data-sr="${r.sr}">`+p.cols.map(c=>{
+      const v = c[0]==="price" ? r.price.toLocaleString("en-IN") : r[c[0]];
+      return `<td${c[0]==="chuck"?' class="ch"':''}>${esc(v)}</td>`;
+    }).join("")+"</tr>").join("");
+  p.inputs.concat([{key:"d"}]).forEach(f=>{
+    const el = f.key==="d" ? $("d") : $("in-"+f.key);
+    el.addEventListener("input",()=>{
+      const allFilled = p.inputs.every(x=>$("in-"+x.key).value.trim()!=="");
+      if(allFilled || $("result").innerHTML) calc();
+    });
+  });
+}
+$("back").addEventListener("click",()=>{
+  showPicker(); window.scrollTo(0,0);
+  try{ history.replaceState(null,"",location.pathname+location.search); }catch(_){}
+});
+window.addEventListener("hashchange",route);
+
+/* ---------- Calculator ---------- */
+function discount(){
+  const v = $("d").value.trim(); const n = parseFloat(v);
+  return (v==="" || isNaN(n)) ? STD : clampPct(n);
+}
+const LEN = "l";   // length key: price scales in proportion to this
+const sizeKeys = () => P.inputs.map(f=>f.key).filter(k=>k!==LEN);
+const lenLabel = () => short(P.inputs.find(f=>f.key===LEN).label);
+const r2 = n => Math.round(n*100)/100;
+const scaled = (r,L) => r2(r.price * L / r[LEN]);
+const multTxt = m => "×" + (Math.round(m*1000)/1000).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:3});
+const sizeText = (r,keys) => P.inputs.filter(f=>keys.includes(f.key)).map(f=>`${short(f.label)} ${r[f.key]}`).join(" × ");
+
+function priceCard(r,L,d){
+  const m = L / r[LEN], price = scaled(r,L), off = r2(price*d/100);
+  const lenRows = m===1 ? "" : `
+      <div><span>Length multiplier (${L} ÷ ${r[LEN]})</span><span>${multTxt(m)}</span></div>
+      <div><span>Price for ${lenLabel()} ${L}</span><span>${fmt(price)}</span></div>`;
+  return `<div class="match">
+    <div class="tag">${m===1?"Exact match":"Scaled by length"} · Sr. ${r.sr}</div>
+    <div class="chuck">${esc(P.sub(r))}</div>
+    <div class="rows">
+      <div><span>Catalogue price (${lenLabel()} ${r[LEN]})</span><span>${fmt(r.price)}</span></div>${lenRows}
+      <div class="disc"><span>Discount (${d}%)</span><span>− ${fmt(off)}</span></div>
+      <div class="net"><span>Net price</span><span>${fmt(r2(price-off))}</span></div>
+    </div></div>`;
+}
+function altRow(r,L,d){
+  const price = scaled(r,L);
+  return `<div class="alt">
+    <div><div class="dims">${esc(sizeText(r,sizeKeys()))} × ${lenLabel()} ${L}</div>
+    <div class="sub">${esc(P.alt(r))} · catalogue ${lenLabel()} ${r[LEN]} (${multTxt(L/r[LEN])})</div></div>
+    <div class="p"><b>${fmt(net(price,d))}</b><s>${fmt(price)}</s></div></div>`;
+}
+function markRows(srs){
+  document.querySelectorAll("#tb tr").forEach(tr=>tr.classList.toggle("hl",srs.includes(+tr.dataset.sr)));
+}
+
+function calc(e){
+  if(e) e.preventDefault();
+  if(!P) return;
+  const want = {}; let missing = false;
+  P.inputs.forEach(f=>{ const v=parseFloat($("in-"+f.key).value); if(isNaN(v)) missing=true; want[f.key]=v; });
+  const d = discount(), out = $("result");
+  markRows([]);
+  if(missing || want[LEN]<=0){
+    out.innerHTML = `<div class="note">Enter ${P.inputs.map(f=>short(f.label).toLowerCase()).join(", ")}.</div>`;
+    return;
+  }
+  const L = want[LEN], keys = sizeKeys();
+  // Rows whose cross-section (everything except length) matches exactly; price scales with length
+  const base = P.rows.filter(r=>keys.every(k=>r[k]===want[k]))
+                     .sort((a,b)=>Math.abs(a[LEN]-L)-Math.abs(b[LEN]-L));
+  if(base.length){
+    let html = base.map(r=>priceCard(r,L,d)).join("");
+    if(base.length>1) html = `<div class="note"><b>${esc(sizeText(base[0],keys))}</b> is listed ${base.length} times in the catalogue (different chucks). Each price below is scaled from its own row — closest catalogue length first.</div>` + html;
+    out.innerHTML = html; markRows(base.map(r=>r.sr));
+    return;
+  }
+  const label = P.inputs.filter(f=>keys.includes(f.key)).map(f=>`${short(f.label)} ${want[f.key]}`).join(" × ");
+  let html = `<div class="note"><b>${esc(label)}</b> isn't a catalogue size.</div>`;
+  const bigger = P.rows.filter(r=>keys.every(k=>r[k]>=want[k])).sort((a,b)=>scaled(a,L)-scaled(b,L)).slice(0,3);
+  let shown;
+  if(bigger.length){
+    html += `<h2>Nearest larger sizes, priced for ${lenLabel()} ${L}</h2>`; shown = bigger;
+  } else {
+    shown = P.rows.map(r=>({r,dist:Math.hypot(...keys.map(k=>r[k]-want[k]))})).sort((a,b)=>a.dist-b.dist).slice(0,3).map(x=>x.r);
+    html += `<h2>No catalogue size is that big. Closest sizes, priced for ${lenLabel()} ${L}:</h2>`;
+  }
+  out.innerHTML = html + shown.map(r=>altRow(r,L,d)).join("") +
+    `<p class="hint">Net price in bold at ${d}% discount; price before discount below it.</p>`;
+  markRows(shown.map(r=>r.sr));
+}
+
+$("f").addEventListener("submit",e=>{
+  calc(e);
+  if(document.activeElement) document.activeElement.blur();   // close the phone keyboard
+  setTimeout(()=>$("result").scrollIntoView({behavior:"smooth",block:"start"}),150);
+});
+$("clear").addEventListener("click",()=>{
+  P.inputs.forEach(f=>$("in-"+f.key).value=""); $("d").value="";
+  $("result").innerHTML=""; markRows([]); $("in-"+P.inputs[0].key).focus();
+});
+$("tb").addEventListener("click",e=>{
+  const tr = e.target.closest("tr"); if(!tr||!P) return;
+  const r = P.rows.find(x=>x.sr===+tr.dataset.sr);
+  P.inputs.forEach(f=>$("in-"+f.key).value=r[f.key]);
+  calc(); window.scrollTo({top:0,behavior:"smooth"});
+});
+
+$("std").value = pctTxt(STD);
+$("std").addEventListener("input",e=>setStd(parseFloat(e.target.value), true));
+$("std").addEventListener("blur",()=>{ $("std").value = pctTxt(STD); });
+$("stdMinus").addEventListener("click",()=>setStd(Math.ceil(STD)-1));
+$("stdPlus").addEventListener("click",()=>setStd(Math.floor(STD)+1));
+
+// Android app back button: return to the product list if a calculator is open
+window.__appBack = () => { if(P){ showPicker(); window.scrollTo(0,0); return true; } return false; };
+
+route();
+</script>
+</body>
+</html>
