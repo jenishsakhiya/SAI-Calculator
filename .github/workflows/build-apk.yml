@@ -15,12 +15,14 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - uses: android-actions/setup-android@v3
+      # The ubuntu-latest runner already has the Android SDK (ANDROID_HOME is set);
+      # Gradle downloads any missing SDK platform automatically.
 
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Build debug APK
         run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
           chmod +x gradlew
           ./gradlew --no-daemon assembleDebug
 
